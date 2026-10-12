@@ -1,4 +1,4 @@
-ENV PYTHONPATH=/app
+
 # Step 1: Use official lightweight Python base image
 FROM python:3.11-alpine
 
@@ -6,6 +6,7 @@ FROM python:3.11-alpine
 WORKDIR /app
 
 # Step 3: Prevent Python from writing .pyc files & buffer streams
+ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 

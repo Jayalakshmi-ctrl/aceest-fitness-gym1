@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'aceest-fitness-app'
-        IMAGE_TAG  = 'v1.0.0'
+        IMAGE_NAME = 'gym-app-v2'
+        IMAGE_TAG  = 'latest'
     }
 
     stages {
@@ -14,44 +14,19 @@ pipeline {
             }
         }
 
-        stage('Environment Initialization') {
+        stage('Docker Image Assembly') {
             steps {
-                echo 'Creating Python isolated environment and installing dependencies...'
-                sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                '''
-            }
-        }
-
-        stage('Static Analysis & Linting') {
-            steps {
-                echo 'Running syntax check framework...'
-                // Verifies files contain valid python syntax without executing them
-                sh '''
-                    . venv/bin/activate
-                    python3 -m compileall app/ run.py
-                '''
+                echo 'Assembling the production Docker container...'
+                // This builds the environment container completely, automatically baking your dependencies inside
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
 
         stage('Execute Unit Tests') {
             steps {
-                echo 'Running automated Pytest Validation Suite...'
-                sh '''
-                    . venv/bin/activate
-                    pytest --verbose
-                '''
-            }
-        }
-
-        stage('Docker Image Assembly') {
-            steps {
-                echo 'Assembling the production Docker container...'
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                sh "docker build -t ${IMAGE_NAME}:latest ."
+                echo 'Running automated Pytest Validation Suite inside the container container...'
+                // This runs the test runner inside the isolated container where python is guaranteed to exist
+                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} pytest --verbose"
             }
         }
     }

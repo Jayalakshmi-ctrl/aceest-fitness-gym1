@@ -1,3 +1,4 @@
+ENV PYTHONPATH=/app
 # Step 1: Use official lightweight Python base image
 FROM python:3.11-alpine
 
